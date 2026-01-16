@@ -108,4 +108,12 @@ Route::middleware('auth')->group(function () {
         '/imports/{importFile}/progress',
         [ImportController::class, 'progress']
     )->name('imports.progress');
+    
+    /* -------------------------------------------------
+     | EXPORT
+     * ------------------------------------------------- */
+
+    Route::get('/reports/devices/export', [ReportController::class, 'exportDevices'])
+    ->name('reports.devices.export');
+
 });
