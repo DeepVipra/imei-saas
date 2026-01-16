@@ -48,4 +48,23 @@ class Dealer extends Model
             'device_id'              // FK on device_allocations
         );
     }
+
+    /**
+     * Dealer → Activations (via allocated devices)
+     *
+     * Used for:
+     * - Dealer-wise activation count
+     * - Billing & performance tracking
+     */
+    public function activations()
+    {
+        return $this->hasManyThrough(
+            Activation::class,       // Final model
+            DeviceAllocation::class, // Intermediate model
+            'dealer_id',             // FK on device_allocations
+            'device_id',             // FK on activations
+            'id',                    // PK on dealers
+            'device_id'              // FK on device_allocations
+        );
+    }
 }

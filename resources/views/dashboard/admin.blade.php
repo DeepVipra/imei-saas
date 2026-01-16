@@ -12,18 +12,21 @@
                 <strong>{{ $totalDevices }}</strong>
             </div>
         </div>
+
         <div class="col-md-3">
             <div class="card p-3 text-center">
-                <h6>Allocated</h6>
+                <h6>Allocated but Not Activated</h6>
                 <strong>{{ $allocatedDevices }}</strong>
             </div>
         </div>
+
         <div class="col-md-3">
             <div class="card p-3 text-center">
                 <h6>Activated</h6>
                 <strong>{{ $activatedDevices }}</strong>
             </div>
         </div>
+
         <div class="col-md-3">
             <div class="card p-3 text-center">
                 <h6>In Stock</h6>
@@ -32,9 +35,9 @@
         </div>
     </div>
 
-    {{-- DEALER ALLOCATION --}}
-    <h4 class="mt-4">Allocation per Dealer</h4>
-    <canvas id="dealerChart" height="120"></canvas>
+    {{-- DEALER-WISE ALLOCATION VS ACTIVATION --}}
+    <h4 class="mt-4">Dealer-wise Allocation vs Activation</h4>
+    <canvas id="dealerAllocationActivationChart" height="120"></canvas>
 
     {{-- PROVINCE-WISE ACTIVATION --}}
     <h4 class="mt-5">Activated Devices by Province</h4>
@@ -55,29 +58,40 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    /* -----------------------------
-     | DEALER ALLOCATION CHART
-     * ----------------------------- */
-    new Chart(document.getElementById('dealerChart'), {
+    /* ------------------------------------
+     | DEALER-WISE ALLOCATION VS ACTIVATION
+     * ------------------------------------ */
+    new Chart(document.getElementById('dealerAllocationActivationChart'), {
         type: 'bar',
         data: {
-            labels: @json($dealerAllocations->pluck('name')),
-            datasets: [{
-                label: 'Allocated Devices',
-                data: @json($dealerAllocations->pluck('allocated_count')),
-                backgroundColor: '#4e73df'
-            }]
+            labels: @json($dealerStats->pluck('name')),
+            datasets: [
+                {
+                    label: 'Allocated',
+                    data: @json($dealerStats->pluck('allocated_count')),
+                },
+                {
+                    label: 'Activated',
+                    data: @json($dealerStats->pluck('activated_count')),
+                }
+            ]
         },
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } }
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            },
+            plugins: {
+                legend: { position: 'top' }
             }
         }
     });
 
     /* -----------------------------
-     | PROVINCE-WISE ACTIVATION CHART ✅
+     | PROVINCE-WISE ACTIVATION
      * ----------------------------- */
     new Chart(document.getElementById('provinceChart'), {
         type: 'bar',
@@ -86,25 +100,24 @@ document.addEventListener('DOMContentLoaded', function () {
             datasets: [{
                 label: 'Activated Devices',
                 data: @json($provinceActivations->pluck('total')),
-                backgroundColor: '#36b9cc'
             }]
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: { display: false }
-            },
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: { precision: 0 }
                 }
+            },
+            plugins: {
+                legend: { display: false }
             }
         }
     });
 
     /* -----------------------------
-     | MODEL DISTRIBUTION CHART
+     | MODEL DISTRIBUTION
      * ----------------------------- */
     new Chart(document.getElementById('modelChart'), {
         type: 'pie',
@@ -112,20 +125,15 @@ document.addEventListener('DOMContentLoaded', function () {
             labels: @json($modelCounts->pluck('model')),
             datasets: [{
                 data: @json($modelCounts->pluck('total')),
-                backgroundColor: [
-                    '#1cc88a',
-                    '#36b9cc',
-                    '#f6c23e',
-                    '#e74a3b',
-                    '#858796'
-                ]
             }]
         },
-        options: { responsive: true }
+        options: {
+            responsive: true
+        }
     });
 
     /* -----------------------------
-     | ACTIVATION TIMELINE CHART
+     | ACTIVATION TIMELINE
      * ----------------------------- */
     new Chart(document.getElementById('timelineChart'), {
         type: 'line',
@@ -134,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function () {
             datasets: [{
                 label: 'Activations',
                 data: @json($activationTimeline->pluck('total')),
-                borderColor: '#1cc88a',
                 fill: false,
                 tension: 0.3
             }]
@@ -142,7 +149,10 @@ document.addEventListener('DOMContentLoaded', function () {
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } }
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
             }
         }
     });

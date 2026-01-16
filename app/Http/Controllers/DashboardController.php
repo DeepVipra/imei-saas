@@ -43,25 +43,15 @@ class DashboardController extends Controller
             ->count();
 
         /* -----------------------------
-         | DEALER ALLOCATIONS
+         | DEALER-WISE ALLOCATION & ACTIVATION
          * ----------------------------- */
-        $dealerAllocations = Dealer::where('tenant_id', $tenantId)
+        $dealerStats = Dealer::where('tenant_id', $tenantId)
             ->withCount([
-                'allocations as allocated_count'
+                'allocations as allocated_count',
+                'activations as activated_count'
             ])
             ->get();
 
-        /* -----------------------------------
-        | PROVINCE-WISE ACTIVATIONS
-        * ----------------------------------- */
-        $provinceActivations = Activation::where('tenant_id', $tenantId)
-            ->select(
-                DB::raw('COALESCE(province, "Unknown") as province'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('province')
-            ->orderBy('total', 'desc')
-            ->get();
         /* -----------------------------
          | MODEL-WISE INVENTORY
          * ----------------------------- */
@@ -72,11 +62,14 @@ class DashboardController extends Controller
 
         /* -----------------------------
          | PROVINCE-WISE ACTIVATIONS
-         | (FROM ACTIVATIONS TABLE)
          * ----------------------------- */
         $provinceActivations = Activation::where('tenant_id', $tenantId)
-            ->select('province', DB::raw('COUNT(*) as total'))
+            ->select(
+                DB::raw('COALESCE(province, "Unknown") as province'),
+                DB::raw('COUNT(*) as total')
+            )
             ->groupBy('province')
+            ->orderBy('total', 'desc')
             ->get();
 
         /* -----------------------------
@@ -94,7 +87,7 @@ class DashboardController extends Controller
             'inStockDevices',
             'allocatedDevices',
             'activatedDevices',
-            'dealerAllocations',
+            'dealerStats',
             'modelCounts',
             'provinceActivations',
             'activationTimeline'
