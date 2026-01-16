@@ -36,22 +36,45 @@ class Activation extends Model
 
     /**
      * IMPORTANT:
-     * Set this based on DB structure
-     *
      * ✔ TRUE  → if activations table HAS created_at & updated_at
      * ✖ FALSE → if activations table DOES NOT have them
      */
-    public $timestamps = true;   // ⬅ change to false if columns are missing
+    public $timestamps = true;
 
     /* -------------------------------------------------
      | RELATIONSHIPS
      * ------------------------------------------------- */
 
+    /**
+     * Activation → Device
+     */
     public function device()
     {
-        return $this->belongsTo(Device::class);
+        return $this->belongsTo(Device::class, 'device_id');
     }
 
+    /**
+     * Activation → Device Allocation
+     *
+     * Used for:
+     * - Dealer filtering
+     * - Dealer-wise activation counts
+     *
+     * Relationship path:
+     * activations.device_id → device_allocations.device_id
+     */
+    public function deviceAllocation()
+    {
+        return $this->hasOne(
+            DeviceAllocation::class,
+            'device_id',   // FK on device_allocations
+            'device_id'    // FK on activations
+        );
+    }
+
+    /**
+     * Activation → Tenant
+     */
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
